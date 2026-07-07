@@ -21,16 +21,26 @@ export default function SuperBreakout() {
   };
 
   const addLevel = () => {
-    game.current.bricks.forEach(b => { b.y += 40; });
+    // Move existing blocks down
+    game.current.bricks.forEach(b => { if (b.active) b.y += 40; });
+    
+    // Add new row at the top (spawned at y: 40)
     for (let c = 0; c < 8; c++) {
       const isYellow = Math.random() > 0.85;
-      game.current.bricks.push({ x: c * 90 + 50, y: 110, w: 80, h: 20, type: isYellow ? 'yellow' : 'blue', active: true });
+      game.current.bricks.push({ 
+        x: c * 90 + 50, 
+        y: 40, 
+        w: 80, 
+        h: 20, 
+        type: isYellow ? 'yellow' : 'blue', 
+        active: true 
+      });
     }
   };
 
   const initGame = () => {
     game.current.bricks = [];
-    // Start with 4 rows of blue/yellow bricks instead of red
+    // Start with 4 rows of bricks
     for(let i = 0; i < 4; i++) addLevel();
   };
 
@@ -50,7 +60,7 @@ export default function SuperBreakout() {
     function loop() {
       const g = game.current;
 
-      // WIN CONDITION: Check if all blocks are inactive
+      // WIN CONDITION: Check if all bricks are inactive
       if (g.bricks.length > 0 && g.bricks.every(b => !b.active)) {
         playSound('/win.wav');
         setGameState('win');
@@ -62,6 +72,7 @@ export default function SuperBreakout() {
       g.ball.y += g.ball.dy * speedMult;
       g.paddle.x = g.mouseX - g.paddle.w / 2;
 
+      // Wall and Paddle collisions
       if (g.ball.x <= 0 || g.ball.x >= canvas.width) { g.ball.dx *= -1; playSound('/bounce.wav'); }
       if (g.ball.y <= 0) { g.ball.dy *= -1; playSound('/bounce.wav'); }
       if (g.ball.y + g.ball.size >= 560 && g.ball.x >= g.paddle.x && g.ball.x <= g.paddle.x + g.paddle.w) {
@@ -69,6 +80,7 @@ export default function SuperBreakout() {
         playSound('/bounce.wav');
       }
 
+      // Brick collisions
       g.bricks.forEach(b => {
         if (b.active && g.ball.x > b.x && g.ball.x < b.x + b.w && g.ball.y > b.y && g.ball.y < b.y + b.h) {
           b.active = false;
@@ -84,6 +96,7 @@ export default function SuperBreakout() {
         }
       });
 
+      // Game Over / Add Level
       if (g.ball.y > canvas.height) {
         if (g.bricks.some(b => b.active && b.y > 520)) { 
           setGameState('over'); 
@@ -93,6 +106,7 @@ export default function SuperBreakout() {
         else { addLevel(); g.ball.x = 400; g.ball.y = 300; g.rainbowTimer = 0; }
       }
 
+      // Render
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       g.bricks.forEach(b => { if (b.active) { ctx.fillStyle = b.type === 'yellow' ? 'yellow' : 'blue'; ctx.fillRect(b.x, b.y, b.w, b.h); } });
