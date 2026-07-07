@@ -15,10 +15,9 @@ export default function SuperBreakout() {
     rainbowTimer: 0,
   });
 
-  // Sound Player Function
   const playSound = (src: string) => {
     const audio = new Audio(src);
-    audio.play().catch(() => {}); // Catch prevents error if user hasn't interacted
+    audio.play().catch(() => {});
   };
 
   const addLevel = () => {
@@ -53,15 +52,13 @@ export default function SuperBreakout() {
       if (gameState !== 'playing') return;
       const g = game.current;
       const speedMult = g.rainbowTimer > 0 ? 2.2 : 1.5;
+      
       g.ball.x += g.ball.dx * speedMult;
       g.ball.y += g.ball.dy * speedMult;
       g.paddle.x = g.mouseX - g.paddle.w / 2;
 
-      // Wall Bounce
       if (g.ball.x <= 0 || g.ball.x >= canvas.width) { g.ball.dx *= -1; playSound('/bounce.wav'); }
       if (g.ball.y <= 0) { g.ball.dy *= -1; playSound('/bounce.wav'); }
-
-      // Paddle Bounce
       if (g.ball.y + g.ball.size >= 560 && g.ball.x >= g.paddle.x && g.ball.x <= g.paddle.x + g.paddle.w) {
         g.ball.dy = -Math.abs(g.ball.dy);
         playSound('/bounce.wav');
@@ -69,14 +66,16 @@ export default function SuperBreakout() {
 
       g.bricks.forEach(b => {
         if (b.active && g.ball.x > b.x && g.ball.x < b.x + b.w && g.ball.y > b.y && g.ball.y < b.y + b.h) {
-          if (b.type === 'red' && g.rainbowTimer > 0) return;
           b.active = false;
           g.ball.dy *= -1;
           playSound('/break.wav');
           
-          if (b.type === 'red') { if (g.bricks.filter(br => br.type === 'red' && br.active).length === 0) setGameState('win'); }
-          else if (b.type === 'yellow') { g.rainbowTimer = 300; setScore(s => s + 50); }
-          else { setScore(s => s + 10); }
+          if (b.type === 'red') {
+            if (g.bricks.filter(br => br.type === 'red' && br.active).length === 0) setGameState('win');
+          } else if (b.type === 'yellow') {
+            g.rainbowTimer = 300;
+            setScore(s => s + 50);
+          } else { setScore(s => s + 10); }
         }
       });
 
@@ -90,8 +89,11 @@ export default function SuperBreakout() {
       g.bricks.forEach(b => { if (b.active) { ctx.fillStyle = b.type === 'red' ? 'red' : b.type === 'yellow' ? 'yellow' : 'blue'; ctx.fillRect(b.x, b.y, b.w, b.h); } });
       ctx.fillStyle = 'white';
       ctx.fillRect(g.paddle.x, 560, g.paddle.w, g.paddle.h);
-      if (g.rainbowTimer > 0) { g.hue = (g.hue + 5) % 360; ctx.fillStyle = `hsl(${g.hue}, 100%, 50%)`; g.rainbowTimer--; } else { ctx.fillStyle = 'white'; }
+      
+      if (g.rainbowTimer > 0) { g.hue = (g.hue + 5) % 360; ctx.fillStyle = `hsl(${g.hue}, 100%, 50%)`; g.rainbowTimer--; } 
+      else { ctx.fillStyle = 'white'; }
       ctx.fillRect(g.ball.x, g.ball.y, g.ball.size, g.ball.size);
+      
       requestAnimationFrame(loop);
     }
     const frameId = requestAnimationFrame(loop);
@@ -102,15 +104,21 @@ export default function SuperBreakout() {
     <div className="flex flex-col items-center justify-center h-screen bg-gray-900 font-mono">
       <div className="relative overflow-hidden border-4 border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]">
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] z-20" />
-        {gameState === 'menu' && (
+        
+        {gameState !== 'playing' && (
           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black bg-opacity-80">
-            <h1 className="text-6xl font-black text-white mb-8 tracking-widest uppercase">Super Breakout</h1>
-            <button onClick={() => setGameState('playing')} className="px-8 py-4 bg-white text-black font-bold text-2xl hover:bg-gray-300">PLAY</button>
+            <h1 className="text-6xl font-black text-white mb-8 tracking-widest uppercase">
+              {gameState === 'win' ? 'YOU WIN!' : gameState === 'over' ? 'GAME OVER' : 'SUPER BREAKOUT'}
+            </h1>
+            <button onClick={() => { setGameState('playing'); setScore(0); }} className="px-8 py-4 bg-white text-black font-bold text-2xl hover:bg-gray-300">
+              {gameState === 'menu' ? 'PLAY' : 'RESTART'}
+            </button>
           </div>
         )}
+        
         <canvas ref={canvasRef} width={800} height={600} className="bg-black block" />
       </div>
-      {gameState === 'playing' && <h1 className="mt-4 text-white text-2xl">Score: {score}</h1>}
+      <h1 className="mt-4 text-white text-2xl">Score: {score}</h1>
     </div>
   );
 }
