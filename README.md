@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Super Breakout
 
-## Getting Started
+An arcade-style, retro-inspired game built with **React**, **TypeScript**, and the **HTML5 Canvas API**. This project brings the classic brick-breaking gameplay to your browser with modern web technologies, featuring a CRT aesthetic, rainbow power-ups, and level-based progression.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+* **Retro Aesthetics**: Immersive CRT scanline effect with 8-bit inspired visuals.
+* **Dynamic Gameplay**: 
+    * **Blue Blocks**: Standard scoring bricks.
+    * **Yellow Blocks**: Rare power-up bricks that trigger "Rainbow Mode" for 5 seconds (increased speed + visual flair).
+    * **Red Blocks**: The win condition! Destroy all 5 top-row red bricks to win.
+* **Procedural Difficulty**: Levels grow as you play. If you miss the ball, the bricks descend; if they reach the bottom, it's Game Over.
+* **Responsive Controls**: Smooth mouse-based paddle movement with a "teleporting" reset mechanic upon losing a life.
+* **Sound Effects**: Integrated audio feedback for bounces, breaks, and losses.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+* **Framework**: [Next.js](https://nextjs.org/) (React)
+* **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+* **Rendering**: HTML5 Canvas API
+* **Language**: TypeScript
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🎮 How to Play
 
-## Learn More
+1.  **Clone the repository**: `git clone <repository-url>`
+2.  **Install dependencies**: `npm install`
+3.  **Run the development server**: `npm run dev`
+4.  **Open in Browser**: Navigate to `http://localhost:3000`.
+5.  **Controls**: Move your **mouse** to control the paddle. Click the **"PLAY"** button on the splash screen to start.
 
-To learn more about Next.js, take a look at the following resources:
+## 🎵 Sound Setup
+To enable audio, add your `.wav` or `.mp3` files into the `/public` directory:
+- `bounce.wav`
+- `break.wav`
+- `lose.wav`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🏗️ Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The game runs on a `requestAnimationFrame` loop that updates at 60FPS. 
+* **Game State**: Managed via `useRef` to ensure high-performance updates without triggering unnecessary React re-renders.
+* **Render Pipeline**: Uses the `canvas` 2D context to draw bricks, the paddle, and the ball, with HSL color cycling for the "Rainbow Mode" effect.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📜 License
+This project is open-source and free to play. Enjoy the challenge!
