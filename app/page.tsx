@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 export default function SuperBreakout() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
-  const [gameState, setGameState] = useState('menu');
+  const [gameState, setGameState] = useState('menu'); // 'menu', 'playing', 'win', 'over'
 
   const game = useRef({
     ball: { x: 400, y: 300, dx: 2, dy: 2, size: 10 },
@@ -37,7 +37,9 @@ export default function SuperBreakout() {
   };
 
   useEffect(() => {
+    // Only start the loop if state is 'playing'
     if (gameState !== 'playing') return;
+    
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext('2d')!;
     initGame();
@@ -49,7 +51,12 @@ export default function SuperBreakout() {
     window.addEventListener('mousemove', handleMouseMove);
 
     function loop() {
-      if (gameState !== 'playing') return;
+      // Immediate exit if game is no longer 'playing' (PAUSE)
+      if (game.current.bricks.filter(b => b.active && b.type === 'red').length === 0) {
+        setGameState('win');
+        return;
+      }
+      
       const g = game.current;
       const speedMult = g.rainbowTimer > 0 ? 2.2 : 1.5;
       
@@ -70,17 +77,19 @@ export default function SuperBreakout() {
           g.ball.dy *= -1;
           playSound('/break.wav');
           
-          if (b.type === 'red') {
-            if (g.bricks.filter(br => br.type === 'red' && br.active).length === 0) setGameState('win');
-          } else if (b.type === 'yellow') {
+          if (b.type === 'yellow') {
             g.rainbowTimer = 300;
             setScore(s => s + 50);
-          } else { setScore(s => s + 10); }
+          } else if (b.type !== 'red') { setScore(s => s + 10); }
         }
       });
 
       if (g.ball.y > canvas.height) {
-        if (g.bricks.some(b => b.active && b.y > 520)) { setGameState('over'); playSound('/lose.wav'); }
+        if (g.bricks.some(b => b.active && b.y > 520)) { 
+          setGameState('over'); 
+          playSound('/lose.wav');
+          return; // Stop the loop
+        }
         else { addLevel(); g.ball.x = 400; g.ball.y = 300; g.mouseX = Math.random() * (canvas.width - g.paddle.w); g.rainbowTimer = 0; }
       }
 
@@ -110,7 +119,7 @@ export default function SuperBreakout() {
             <h1 className="text-6xl font-black text-white mb-8 tracking-widest uppercase">
               {gameState === 'win' ? 'YOU WIN!' : gameState === 'over' ? 'GAME OVER' : 'SUPER BREAKOUT'}
             </h1>
-            <button onClick={() => { setGameState('playing'); setScore(0); }} className="px-8 py-4 bg-white text-black font-bold text-2xl hover:bg-gray-300">
+            <button onClick={() => { setGameState('playing'); setScore(0); initGame(); }} className="px-8 py-4 bg-white text-black font-bold text-2xl hover:bg-gray-300">
               {gameState === 'menu' ? 'PLAY' : 'RESTART'}
             </button>
           </div>
